@@ -142,4 +142,8 @@ $RECYCLE.BIN/
 *.synctex.gz(busy)
 *.pdfsync
 
+
+## 
+*.RData
+*.rds
 .vscode/
