@@ -47,40 +47,40 @@ plot_ts_all <- as_tibble(data) |>
   theme_bw()
 
 ggsave(filename = paste0("./img/ts_", name, "/plot_all_ts_energy.pdf"), 
-       plot = plot_ts_all, width = 9, height = 7, dpi = 300)
+       plot = plot_ts_all, width = 9, height = 6, dpi = 300)
 
-# plot_ts_bts <- as_tibble(data) |>
-#   add_column(dt = info$inds, .before = 1) |>
-#   pivot_longer(-dt) |>
-#   filter(name %in% colnames(agg_mat))|> 
-#   mutate(name = factor(name, namets, ordered = TRUE),
-#          name = recode(name, !!!setNames(names(namets), namets))) |>
-#   ggplot(aes(x = dt, col = name, y = value)) + 
-#   geom_line() +  
-#   scale_colour_hue() + 
-#   scale_y_sqrt() + 
-#   guides(col=guide_legend(ncol =1, title = NULL))+
-#   labs(y = "Electricity generation (bottom time series)", x = "Date") + 
-#   theme_bw()
-# 
-# ggsave(filename = paste0("./img/ts_", name, "/plot_bts_ts_energy.pdf"), 
-#        plot = plot_ts_bts, width = 9, height = 7, dpi = 300)
-# 
-# plot_ts_uts <- as_tibble(data) |>
-#   add_column(dt = info$inds, .before = 1) |>
-#   pivot_longer(-dt) |>
-#   filter(name %in% rownames(agg_mat))|> 
-#   mutate(name = factor(name, namets, ordered = TRUE),
-#          name = recode(name, !!!setNames(names(namets), namets))) |>
-#   ggplot(aes(x = dt, col = name, y = value)) + 
-#   geom_line() +  
-#   scale_colour_hue() + 
-#   #scale_y_sqrt() + 
-#   guides(col=guide_legend(ncol =1, title = NULL))+
-#   labs(y = "Electricity generation (upper time series)", x = "Date") + 
-#   theme_bw()
-# ggsave(filename = paste0("./img/ts_", name, "/plot_uts_ts_energy.pdf"), 
-#        plot = plot_ts_uts, width = 9, height = 7, dpi = 300)
+plot_ts_bts <- as_tibble(data) |>
+  add_column(dt = info$inds, .before = 1) |>
+  pivot_longer(-dt) |>
+  filter(name %in% colnames(agg_mat))|>
+  mutate(name = factor(name, namets, ordered = TRUE),
+         name = recode(name, !!!setNames(names(namets), namets))) |>
+  ggplot(aes(x = dt, col = name, y = value)) +
+  geom_line() +
+  scale_colour_hue() +
+  scale_y_sqrt() +
+  guides(col=guide_legend(ncol =1, title = NULL))+
+  labs(y = "Electricity generation (bottom time series)", x = "Date") +
+  theme_bw()
+
+ggsave(filename = paste0("./img/ts_", name, "/plot_bts_ts_energy.pdf"),
+       plot = plot_ts_bts, width = 9, height = 5, dpi = 300)
+
+plot_ts_uts <- as_tibble(data) |>
+  add_column(dt = info$inds, .before = 1) |>
+  pivot_longer(-dt) |>
+  filter(name %in% rownames(agg_mat))|>
+  mutate(name = factor(name, namets, ordered = TRUE),
+         name = recode(name, !!!setNames(names(namets), namets))) |>
+  ggplot(aes(x = dt, col = name, y = value)) +
+  geom_line() +
+  scale_colour_hue() +
+  #scale_y_sqrt() +
+  guides(col=guide_legend(ncol =1, title = NULL))+
+  labs(y = "Electricity generation (upper time series)", x = "Date") +
+  theme_bw()
+ggsave(filename = paste0("./img/ts_", name, "/plot_uts_ts_energy.pdf"),
+       plot = plot_ts_uts, width = 9, height = 5, dpi = 300)
 
 namets_no <- c("Total"="Total",
             "non-Renew."="NRenew",
