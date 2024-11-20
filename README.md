@@ -6,4 +6,5 @@
 
 ## Directories
 -   `manuscript`: manuscript and online appendix files (tex, bib and pdf).
--   `cfc_exp`: code for the empirical application.
+-   `cfc_sim`: code for the simulations.
+-   `cfc_exp`: code for the empirical application of Australian daily energy generation time series.

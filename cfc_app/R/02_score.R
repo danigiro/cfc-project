@@ -111,6 +111,7 @@ comb <- c("snaive-none-base",
           "tb+st+ar-scr_var-shr",
           "tb+st+ar-scr_cov-shr",
           "tb+st+ar-scr_cov0-shr", 
+          "tb+st+ar-occ-wls", 
           "tb+st+ar-occ-shr", 
           "tb+st+ar-occ-shrbe", 
           "tb+st+ar-occ-shrbv")

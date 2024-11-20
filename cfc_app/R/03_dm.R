@@ -10,40 +10,38 @@ if(length(args) == 0){
 }
 
 if(name %in% c("energy")){
-  comb <- c("stlf"="stlf-none-base", 
-            "arima"="arima-none-base", 
-            "tbats"="tbats-none-base",
+  comb <- c("tbats"="tbats-none-base",
+            "tbats[shr]"="tbats-cs-shr", 
             "ew"="tb+st+ar-sa-base", 
             "ow[var]"="tb+st+ar-var-base", 
             "ow[cov]"="tb+st+ar-cov0-base",
-            "stlf[shr]"="stlf-cs-shr", 
-            "arima[shr]"="arima-cs-shr", 
-            "tbats[shr]"="tbats-cs-shr", 
             "src"="tb+st+ar-src_sa-shr", 
             "scr[ew]"="tb+st+ar-scr_sa-shr", 
             "scr[var]"="tb+st+ar-scr_var-shr", 
             "scr[cov]"="tb+st+ar-scr_cov0-shr", 
-            "occ"="tb+st+ar-occ-shrbe")
+            #"occ[wls]"="tb+st+ar-occ-wls",
+            "occ[be]"="tb+st+ar-occ-shrbe")
   nts <- c(23, 8, 15)
-  ncomb <- c(3, 3, 3, 5)
+  ncomb <- c(2, 3, 6)
   
   comb_oa <- c("stlf"="stlf-none-base", 
                "arima"="arima-none-base", 
                "tbats"="tbats-none-base",
-               "ew"="tb+st+ar-sa-base", 
-               "ow[var]"="tb+st+ar-var-base", 
-               "ow[cov]"="tb+st+ar-cov0-base",
                "stlf[shr]"="stlf-cs-shr", 
                "arima[shr]"="arima-cs-shr", 
                "tbats[shr]"="tbats-cs-shr", 
+               "ew"="tb+st+ar-sa-base", 
+               "ow[var]"="tb+st+ar-var-base", 
+               "ow[cov]"="tb+st+ar-cov0-base",
                "src"="tb+st+ar-src_sa-shr", 
                "scr[ew]"="tb+st+ar-scr_sa-shr", 
                "scr[var]"="tb+st+ar-scr_var-shr", 
                "scr[cov]"="tb+st+ar-scr_cov0-shr", 
                "occ[bv]"="tb+st+ar-occ-shrbv", 
                "occ[shr]"="tb+st+ar-occ-shr", 
-               "occ"="tb+st+ar-occ-shrbe")
-  ncomb_oa <- c(3, 3, 3, 7)
+               "occ[wls]"="tb+st+ar-occ-wls",
+               "occ[be]"="tb+st+ar-occ-shrbe")
+  ncomb_oa <- c(3, 3, 3, 8)
 }
 
 data_se <- readRDS(file.path(".", "fc", name, paste0(name, "_se_dm_red.rds")))
@@ -58,9 +56,9 @@ var_bts <- readRDS(file.path(".", "fc", name, paste0(name, "_score.rds"))) |>
 hmax <- max(data_se$h)
 
 data <- bind_rows(data_se |>
-            add_column(err = "mse"),
-          data_abs |>
-            add_column(err = "mae"))
+                    add_column(err = "mse"),
+                  data_abs |>
+                    add_column(err = "mae"))
 
 df1 <- bind_rows(data |>
                    mutate(type = as.numeric(var %in% var_bts)),
@@ -76,9 +74,9 @@ df1 <- bind_rows(data |>
          h2 = paste0("h==",h))
 
 df0 <- bind_rows(data |>
-                      mutate(type = as.numeric(var %in% var_bts)),
+                   mutate(type = as.numeric(var %in% var_bts)),
                  data |>
-                      mutate(type = -1)) |>
+                   mutate(type = -1)) |>
   unique() |>
   group_by(e1, e2, alternative, type, err) |>
   summarise(value = sum(pvalue <= 0.05), 
@@ -107,46 +105,35 @@ plot_dm <- df |>
   ggplot(aes(x = e1, y = e2)) + 
   geom_tile(aes(fill = value_perc/100), color = "black") +
   geom_text(aes(label = round(value_perc, 0)), color = "black", size = 2) +
-  geom_vline(xintercept = sum(ncomb[1:2])+0.5) + 
-  geom_hline(yintercept = sum(ncomb[1:2])+0.5) + 
-  geom_vline(xintercept = ncomb[1]+0.5, linewidth = 0.3) + 
-  geom_hline(yintercept = ncomb[1]+0.5, linewidth = 0.3) + 
-  geom_vline(xintercept = sum(ncomb[1:3])+0.5, linewidth = 0.3) + 
-  geom_hline(yintercept = sum(ncomb[1:3])+0.5, linewidth = 0.3) + 
+  geom_vline(xintercept = sum(ncomb[1:2])+0.5, linewidth = 0.75) + 
+  geom_hline(yintercept = sum(ncomb[1:2])+0.5, linewidth = 0.75) + 
+  geom_vline(xintercept = ncomb[1]+0.5, linewidth = 0.75) + 
+  geom_hline(yintercept = ncomb[1]+0.5, linewidth = 0.75) + 
   scale_fill_gradient(low = "white", 
                       high = "#a7e7a7", limits = c(0, lim_leg),
                       breaks = seq(0, lim_leg, 0.1),
-                      #scale_fill_gradient(low = "white", high = "#a7e7a7", limits = c(0, 1),
                       labels = scales::label_percent())+
-  facet_grid(err~h2, #dir = "v", 
-             #ncol = 2,
-             labeller = label_parsed)+
-  guides(
-    fill = guide_colorbar(
-      frame.colour = "black", ticks.colour = "black",frame.linewidth = 0.1,
-      draw.llim = FALSE,
-      draw.ulim = FALSE,
-      display = "gradient",
-      barheight = unit(0.35, 'cm'),
-      barwidth = unit(12, 'cm'),
-      title.position = 'top'
-    )
-  )+
+  facet_grid(err~h2, labeller = label_parsed)+
+  guides(fill = guide_colorbar(
+    frame.colour = "black", ticks.colour = "black",frame.linewidth = 0.1,
+    draw.llim = FALSE,
+    draw.ulim = FALSE,
+    display = "gradient",
+    barheight = unit(0.35, 'cm'),
+    barwidth = unit(12, 'cm'),
+    title.position = 'top'))+
   labs(y = "M2", x = "M1", fill = "M2 (column) is more accurate than M1 (row), p-value = 0.05") + 
   scale_y_discrete(labels = function(l) parse(text=l))+ 
   scale_x_discrete(labels = function(l) parse(text=l))+ 
   coord_fixed(expand = F)+
   theme_minimal() + 
-  theme(#legend.title = element_blank(),
-    panel.background = element_rect(linewidth = 0.1),
-    legend.title=element_text(size=8, hjust = 0.5),
-    legend.text = element_text(size=6),
-    legend.position = "top",
-    panel.grid = element_blank(),
-    axis.text.x = element_text(angle = 90, v = 0.5, h = 1),
-    #text = element_text(size = utils$font),
-    #strip.text = element_text(size = utils$font),
-    legend.margin = margin(b = -12.5))
+  theme(panel.background = element_rect(linewidth = 0.1),
+        legend.title=element_text(size=8, hjust = 0.5),
+        legend.text = element_text(size=6),
+        legend.position = "top",
+        panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 90, v = 0.5, h = 1),
+        legend.margin = margin(b = -12.5))
 
 ggsave(filename = paste0("./img/p_", name, "_dm.pdf"), plot = plot_dm, width = 7, height = 7)
 
@@ -170,46 +157,37 @@ plot_oa <- df |>
   ggplot(aes(x = e1, y = e2)) + 
   geom_tile(aes(fill = value_perc/100), color = "black") +
   geom_text(aes(label = round(value_perc, 0)), color = "black", size = 2) +
-  geom_vline(xintercept = sum(ncomb_oa[1:2])+0.5) + 
-  geom_hline(yintercept = sum(ncomb_oa[1:2])+0.5) + 
-  geom_vline(xintercept = ncomb_oa[1]+0.5, linewidth = 0.3) + 
-  geom_hline(yintercept = ncomb_oa[1]+0.5, linewidth = 0.3) + 
-  geom_vline(xintercept = sum(ncomb_oa[1:3])+0.5, linewidth = 0.3) + 
-  geom_hline(yintercept = sum(ncomb_oa[1:3])+0.5, linewidth = 0.3) + 
+  geom_vline(xintercept = sum(ncomb_oa[1:2])+0.5, linewidth = 0.75) + 
+  geom_hline(yintercept = sum(ncomb_oa[1:2])+0.5, linewidth = 0.75) + 
+  geom_vline(xintercept = ncomb_oa[1]+0.5, linewidth = 0.75) + 
+  geom_hline(yintercept = ncomb_oa[1]+0.5, linewidth = 0.75) + 
+  geom_vline(xintercept = sum(ncomb_oa[1:3])+0.5, linewidth = 0.75) + 
+  geom_hline(yintercept = sum(ncomb_oa[1:3])+0.5, linewidth = 0.75) + 
   scale_fill_gradient(low = "white", 
                       high = "#a7e7a7", limits = c(0, lim_leg),
                       breaks = seq(0, lim_leg, 0.1),
-                      #scale_fill_gradient(low = "white", high = "#a7e7a7", limits = c(0, 1),
                       labels = scales::label_percent())+
-  facet_grid(err~h2, #dir = "v", 
-             #ncol = 2,
-             labeller = label_parsed)+
-  guides(
-    fill = guide_colorbar(
-      frame.colour = "black", ticks.colour = "black",frame.linewidth = 0.1,
-      draw.llim = FALSE,
-      draw.ulim = FALSE,
-      display = "gradient",
-      barheight = unit(0.35, 'cm'),
-      barwidth = unit(12, 'cm'),
-      title.position = 'top'
-    )
-  )+
+  facet_grid(err~h2, labeller = label_parsed)+
+  guides(fill = guide_colorbar(
+    frame.colour = "black", ticks.colour = "black",frame.linewidth = 0.1,
+    draw.llim = FALSE,
+    draw.ulim = FALSE,
+    display = "gradient",
+    barheight = unit(0.35, 'cm'),
+    barwidth = unit(12, 'cm'),
+    title.position = 'top'))+
   labs(y = "M2", x = "M1", fill = "M2 (column) is more accurate than M1 (row), p-value = 0.05") + 
   scale_y_discrete(labels = function(l) parse(text=l))+ 
   scale_x_discrete(labels = function(l) parse(text=l))+ 
   coord_fixed(expand = F)+
   theme_minimal() + 
-  theme(#legend.title = element_blank(),
-    panel.background = element_rect(linewidth = 0.1),
-    legend.title=element_text(size=8, hjust = 0.5),
-    legend.text = element_text(size=6),
-    legend.position = "top",
-    panel.grid = element_blank(),
-    axis.text.x = element_text(angle = 90, v = 0.5, h = 1),
-    #text = element_text(size = utils$font),
-    #strip.text = element_text(size = utils$font),
-    legend.margin = margin(b = -12.5))
+  theme(panel.background = element_rect(linewidth = 0.1),
+        legend.title=element_text(size=8, hjust = 0.5),
+        legend.text = element_text(size=6),
+        legend.position = "top",
+        panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 90, v = 0.5, h = 1),
+        legend.margin = margin(b = -12.5))
 
 ggsave(filename = paste0("./img/oa_", name, "_dm.pdf"), plot = plot_oa, width = 7, height = 7)
 

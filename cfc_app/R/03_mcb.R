@@ -11,21 +11,36 @@ if(length(args) == 0){
 }
 
 if(name %in% c("energy")){
-  comb <- c("stlf"="stlf-none-base", 
-            "arima"="arima-none-base", 
-            "tbats"="tbats-none-base",
+  comb <- c("tbats"="tbats-none-base",
             "ew"="tb+st+ar-sa-base", 
             "ow[var]"="tb+st+ar-var-base", 
             "ow[cov]"="tb+st+ar-cov0-base",
-            "stlf[shr]"="stlf-cs-shr", 
-            "arima[shr]"="arima-cs-shr", 
             "tbats[shr]"="tbats-cs-shr", 
             "src"="tb+st+ar-src_sa-shr", 
             "scr[ew]"="tb+st+ar-scr_sa-shr", 
             "scr[var]"="tb+st+ar-scr_var-shr", 
             "scr[cov]"="tb+st+ar-scr_cov0-shr", 
-            "occ"="tb+st+ar-occ-shrbe")
+            #"occ[wls]"="tb+st+ar-occ-wls", 
+            "occ[be]"="tb+st+ar-occ-shrbe")
   nts <- c(23, 8, 15)
+  
+  comb_oa <- c("stlf"="stlf-none-base", 
+               "arima"="arima-none-base", 
+               "tbats"="tbats-none-base",
+               "stlf[shr]"="stlf-cs-shr", 
+               "arima[shr]"="arima-cs-shr", 
+               "tbats[shr]"="tbats-cs-shr", 
+               "ew"="tb+st+ar-sa-base", 
+               "ow[var]"="tb+st+ar-var-base", 
+               "ow[cov]"="tb+st+ar-cov0-base",
+               "src"="tb+st+ar-src_sa-shr", 
+               "scr[ew]"="tb+st+ar-scr_sa-shr", 
+               "scr[var]"="tb+st+ar-scr_var-shr", 
+               "scr[cov]"="tb+st+ar-scr_cov0-shr", 
+               "occ[bv]"="tb+st+ar-occ-shrbv", 
+               "occ[shr]"="tb+st+ar-occ-shr", 
+               "occ[wls]"="tb+st+ar-occ-wls", 
+               "occ[be]"="tb+st+ar-occ-shrbe")
 }
 
 data <- readRDS(file.path(".", "fc", name, paste0(name, "_mcb.rds")))
@@ -43,8 +58,7 @@ nemenyi_fun <- function(data){
                                  rename(as_tibble(nemenyi$means+nemenyi$cd/2, rownames = "name"), "u" = "value"), 
                                  by = "name"), by = "name") |>
     arrange(value) |>
-    mutate(#name = gsub(" ", "", name),
-      name_num = paste0(" - ", sprintf('"%.2f"', value))) |>
+    mutate(name_num = paste0(" - ", sprintf('"%.2f"', value))) |>
     add_column(fpval = nemenyi$fpval,
                fH = nemenyi$fH)
   df_plot$col <- df_plot$l <= df_plot$u[1]
@@ -55,39 +69,37 @@ nemenyi_fun <- function(data){
 hmax <- max(data$h)
 
 dfmcb <- data |>
-  filter(name %in% comb, h %in% c(0, 1)) |>
+  filter(name %in% comb_oa, h %in% c(0, 1)) |>
   pivot_longer(-any_of(c("h", "var", "name", "bts", "ite")), names_to = "err")
 
 dfmcb <- bind_rows(dfmcb |>
-                      mutate(type = as.numeric(var %in% var_bts)),
-                    dfmcb |>
-                      mutate(type = -1)) |>
+                     mutate(type = as.numeric(var %in% var_bts)),
+                   dfmcb |>
+                     mutate(type = -1)) |>
   select(any_of(c("h", "name", "var", "value", "ite", "err", "type"))) |>
   group_by(h, err, type) |>
   nest() |>
   mutate(data = map(data, pivot_wider, names_from = name),
-         data = map(data, function(x) select(x, any_of(unname(comb)))),
+         data = map(data, function(x) select(x, any_of(unname(comb_oa)))),
          data = map(data, nemenyi_fun)) |>
   unnest(cols = c(data)) |>
   ungroup() |>
   arrange(value) |>
   mutate(pch_name_old = stringr::str_detect(name, "base"),
          pch_name = ifelse(pch_name_old, ifelse(stringr::str_detect(name, "stlf|arima|tbats"), "A", "B"), "C"),
-         name = recode(factor(name), !!!setNames(names(comb), unname(comb))),
+         name = recode(factor(name), !!!setNames(names(comb_oa), unname(comb_oa))),
          name = paste0(name, name_num),
          err = toupper(err)) |>
   arrange(value) |>
   mutate(name = factor(name, unique(name), ordered = TRUE)) |>
-  #mutate(h = factor(h, rev(input$h), ordered = TRUE)) |>
   arrange(desc(h), type) |> 
   mutate(type = factor(type, ordered = TRUE),
          type_name = recode(type, "-1" = paste0("All~", nts[1], "~ts"), 
-                       "0" = paste0(nts[2], "~upper~ts"), 
-                       "1" = paste0(nts[3], "~bottom~ts")),
+                            "0" = paste0(nts[2], "~upper~ts"), 
+                            "1" = paste0(nts[3], "~bottom~ts")),
          facet = paste0(err, "-", type_name, "-h==",
                         ifelse(h == 0, paste0("1*','*ldots*','*", hmax), h)),
          facet = factor(facet, unique(facet), ordered = TRUE)) 
-
 
 for(errid in c("MSE", "MAE")){
   plot_mcb <- dfmcb |>
@@ -113,13 +125,46 @@ for(errid in c("MSE", "MAE")){
     theme_minimal()+
     theme(legend.title = element_blank(),
           legend.position = "none",
-          #text = element_text(size = utils$font),
-          #strip.text = element_text(size = utils$font),
           legend.margin = margin())
   
   ggsave(filename = paste0("./img/oa_", name, "_", tolower(errid), "_mcb.pdf"), 
          plot = plot_mcb, width = 7, height = 9)
 }
+
+
+dfmcb <- data |>
+  filter(name %in% comb, h %in% c(0, 1)) |>
+  pivot_longer(-any_of(c("h", "var", "name", "bts", "ite")), names_to = "err")
+
+dfmcb <- bind_rows(dfmcb |>
+                     mutate(type = as.numeric(var %in% var_bts)),
+                   dfmcb |>
+                     mutate(type = -1)) |>
+  select(any_of(c("h", "name", "var", "value", "ite", "err", "type"))) |>
+  group_by(h, err, type) |>
+  nest() |>
+  mutate(data = map(data, pivot_wider, names_from = name),
+         data = map(data, function(x) select(x, any_of(unname(comb)))),
+         data = map(data, nemenyi_fun)) |>
+  unnest(cols = c(data)) |>
+  ungroup() |>
+  arrange(value) |>
+  mutate(pch_name_old = stringr::str_detect(name, "base"),
+         pch_name = ifelse(pch_name_old, ifelse(stringr::str_detect(name, "stlf|arima|tbats"), "A", "B"), "C"),
+         name = recode(factor(name), !!!setNames(names(comb), unname(comb))),
+         name = paste0(name, name_num),
+         err = toupper(err)) |>
+  arrange(value) |>
+  mutate(name = factor(name, unique(name), ordered = TRUE)) |>
+  #mutate(h = factor(h, rev(input$h), ordered = TRUE)) |>
+  arrange(desc(h), type) |> 
+  mutate(type = factor(type, ordered = TRUE),
+         type_name = recode(type, "-1" = paste0("All~", nts[1], "~ts"), 
+                            "0" = paste0(nts[2], "~upper~ts"), 
+                            "1" = paste0(nts[3], "~bottom~ts")),
+         facet = paste0(err, "-", type_name, "-h==",
+                        ifelse(h == 0, paste0("1*','*ldots*','*", hmax), h)),
+         facet = factor(facet, unique(facet), ordered = TRUE)) 
 
 plot_mcb <- dfmcb |>
   filter(type == -1) |>
@@ -144,8 +189,6 @@ plot_mcb <- dfmcb |>
   theme_minimal()+
   theme(legend.title = element_blank(),
         legend.position = "none",
-        #text = element_text(size = utils$font),
-        #strip.text = element_text(size = utils$font),
         legend.margin = margin())
 
 ggsave(filename = paste0("./img/p_", name, "_mcb.pdf"), plot = plot_mcb, 
