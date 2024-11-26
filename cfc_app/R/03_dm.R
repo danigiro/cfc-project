@@ -122,7 +122,7 @@ plot_dm <- df |>
     barheight = unit(0.35, 'cm'),
     barwidth = unit(12, 'cm'),
     title.position = 'top'))+
-  labs(y = "M2", x = "M1", fill = "M2 (column) is more accurate than M1 (row), p-value = 0.05") + 
+  labs(y = "M2", x = "M1", fill = "M2 (y-axis) is more accurate than M1 (x-axis), p-value = 0.05") + 
   scale_y_discrete(labels = function(l) parse(text=l))+ 
   scale_x_discrete(labels = function(l) parse(text=l))+ 
   coord_fixed(expand = F)+
@@ -176,7 +176,7 @@ plot_oa <- df |>
     barheight = unit(0.35, 'cm'),
     barwidth = unit(12, 'cm'),
     title.position = 'top'))+
-  labs(y = "M2", x = "M1", fill = "M2 (column) is more accurate than M1 (row), p-value = 0.05") + 
+  labs(y = "M2", x = "M1", fill = "M2 (y-axis) is more accurate than M1 (x-axis), p-value = 0.05") + 
   scale_y_discrete(labels = function(l) parse(text=l))+ 
   scale_x_discrete(labels = function(l) parse(text=l))+ 
   coord_fixed(expand = F)+

@@ -1,8 +1,8 @@
 suppressPackageStartupMessages(library(tidyverse))
 
 dir.create("./score", recursive = TRUE, showWarnings = FALSE)
-
-for(folder_id in list.dirs("./results", recursive = FALSE)){
+folder_vec <- list.dirs("./results", recursive = FALSE)
+for(folder_id in folder_vec){
   data <- NULL
   for(pattern_id in c("sett1", "sett2", "sett3", "sett4", "sett5", "sett6")){
     files <- list.files(folder_id, pattern = paste0(pattern_id), full.names = TRUE)
