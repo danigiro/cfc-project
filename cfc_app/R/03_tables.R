@@ -15,7 +15,7 @@ data <- readRDS(file.path(".", "fc", name, paste0(name, "_score.rds")))
 if(name %in% c("energy")){
   comb <- c("tbats"="tbats-none-base",
             "tbats$_{\\text{shr}}$"="tbats-cs-shr", 
-            "ew"="tb+st+ar-sa-base", 
+            #"ew"="tb+st+ar-sa-base", 
             "ow$_{\\text{var}}$"="tb+st+ar-var-base", 
             "ow$_{\\text{cov}}$"="tb+st+ar-cov0-base",
             "src"="tb+st+ar-src_sa-shr", 
@@ -25,7 +25,7 @@ if(name %in% c("energy")){
             "occ$_{\\text{be}}$"="tb+st+ar-occ-shrbe")
   hid <- setNames(c(1:7, 0), c(1:7, "1:7")) 
   nts <- c(23, 8, 15)
-  ncomb <- c(2, 3, 5)
+  ncomb <- c(2, 2, 5)
   
   comb_oa <- c("stlf"="stlf-none-base", 
                "arima"="arima-none-base", 
@@ -33,7 +33,7 @@ if(name %in% c("energy")){
                "stlf$_{\\text{shr}}$"="stlf-cs-shr", 
                "arima$_{\\text{shr}}$"="arima-cs-shr", 
                "tbats$_{\\text{shr}}$"="tbats-cs-shr", 
-               "ew"="tb+st+ar-sa-base", 
+               #"ew"="tb+st+ar-sa-base", 
                "ow$_{\\text{var}}$"="tb+st+ar-var-base", 
                "ow$_{\\text{cov}}$"="tb+st+ar-cov0-base",
                "src"="tb+st+ar-src_sa-shr", 
@@ -44,7 +44,7 @@ if(name %in% c("energy")){
                "occ$_{\\text{shr}}$"="tb+st+ar-occ-shr", 
                "occ$_{\\text{wls}}$"="tb+st+ar-occ-wls", 
                "occ$_{\\text{be}}$"="tb+st+ar-occ-shrbe")
-  ncomb_oa <- c(3, 3, 3, 8)
+  ncomb_oa <- c(3, 3, 2, 8)
 }
 
 df <- full_join(

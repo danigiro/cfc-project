@@ -119,10 +119,10 @@ plot_dm <- df |>
     draw.llim = FALSE,
     draw.ulim = FALSE,
     display = "gradient",
-    barheight = unit(0.35, 'cm'),
-    barwidth = unit(12, 'cm'),
+    barwidth = unit(0.35, 'cm'),
+    barheight = unit(10, 'cm'),
     title.position = 'top'))+
-  labs(y = "M2", x = "M1", fill = "M2 (y-axis) is more accurate than M1 (x-axis), p-value = 0.05") + 
+  labs(y = "M2", x = "M1", fill = NULL, caption = "M2 (y-axis) is more accurate than M1 (x-axis), p-value = 0.05") + 
   scale_y_discrete(labels = function(l) parse(text=l))+ 
   scale_x_discrete(labels = function(l) parse(text=l))+ 
   coord_fixed(expand = F)+
@@ -130,12 +130,12 @@ plot_dm <- df |>
   theme(panel.background = element_rect(linewidth = 0.1),
         legend.title=element_text(size=8, hjust = 0.5),
         legend.text = element_text(size=6),
-        legend.position = "top",
+        legend.position = "right",
         panel.grid = element_blank(),
         axis.text.x = element_text(angle = 90, v = 0.5, h = 1),
         legend.margin = margin(b = -12.5))
 
-ggsave(filename = paste0("./img/p_", name, "_dm.pdf"), plot = plot_dm, width = 7, height = 7)
+ggsave(filename = paste0("./img/p_", name, "_dm.pdf"), plot = plot_dm, width = 7, height = 6.5)
 
 
 df <- bind_rows(df1, df0) |>

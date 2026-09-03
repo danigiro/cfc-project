@@ -1,11 +1,141 @@
 # Coherent forecast combination for linearly constrained multiple time series
 
--   **Manuscript title**: *Coherent forecast combination for linearly constrained multiple time series*
--   **Authors**: Daniele Girolimetto, and Tommaso Di Fonzo
--   **DOI**: [https://doi.org/XXX/arXiv.XXX](https://doi.org/XXX/arXiv.XXX)
--   **Package**: [FoCo2](https://danigiro.github.io/FoCo2)
+Reproducibility package for the manuscript
 
-## Directories
--   `manuscript`: manuscript and online appendix files (tex, bib and pdf).
--   `cfc_sim`: code for the simulations.
--   `cfc_exp`: code for the empirical application of Australian daily energy generation time series.
+-   **Title**: *Coherent forecast combination for linearly constrained multiple time series*
+-   **Authors**: Daniele Girolimetto and Tommaso Di Fonzo
+
+## Reproducibility package
+
+-   **Assembled on**: 3 September 2026
+-   **Assembled by**: Daniele Girolimetto, Department of Statistical Sciences,
+    University of Padova
+-   **Contact**: <daniele.girolimetto@unipd.it>
+-   **Licence**: the code is released under the GNU General Public License v3.0
+    (see the `LICENSE` file). The licence covers the code only; the electricity
+    generation data in `cfc_app/data/` are third-party data, whose origin and
+    terms of use are documented in the *Data* section of `cfc_app/README.md`.
+
+## Repository structure and availability
+
+-   `cfc_sim`: code and results for the simulation experiment (see `cfc_sim/README.md`).
+-   `cfc_app`: code, data and results for the empirical application on Australian
+    daily electricity generation (see `cfc_app/README.md`).
+
+Each directory contains its own `README.md` with the step-by-step instructions to
+reproduce that experiment, the expected runtime and the files it produces. Every
+script must be run with its own project directory (`cfc_sim` or `cfc_app`) as the
+working directory: all paths are relative to it.
+
+```
+cfc-project/
+├── README.md                   this file
+├── LICENSE                     GPL-3, code only
+│
+├── cfc_sim/                    SIMULATION EXPERIMENT
+│   ├── README.md               instructions, runtimes, table mapping
+│   ├── cfc_sim.Rproj           RStudio project file
+│   ├── R/                      [code]          simulation and table scripts
+│   ├── run_bal.sh              [code]          runs the balanced framework
+│   ├── run_unb.sh              [code]          runs the unbalanced framework
+│   ├── results/                [intermediate]  raw output, one .rds per
+│   │                                           configuration (216 files, ~21 GB)
+│   ├── score/                  [intermediate]  MSE and MAE per configuration
+│   └── tables/                 [output]        LaTeX tables of the paper
+│
+└── cfc_app/                    EMPIRICAL APPLICATION
+    ├── README.md               instructions, data, runtimes, table mapping
+    ├── cfc_app.Rproj           RStudio project file
+    ├── R/                      [code]          forecasting and evaluation scripts
+    ├── energy.sh               [code]          runs the whole pipeline
+    ├── data/energy/            [input]         raw and pre-processed data
+    ├── RData/                  [intermediate]  data in R format, auto-generated
+    ├── fc/energy/              [intermediate]  base, reconciled and combined
+    │                                           forecasts, and scores
+    ├── tables/                 [output]        LaTeX tables of the paper
+    └── img/                    [output]        figures of the paper
+```
+
+Input data are the starting point and are never overwritten. Intermediate files
+are produced by the scripts and exist only to allow the pipeline to be entered
+at a later step, without repeating the expensive ones; each of the two
+`README.md` files says which script writes which of them. Output files are the
+tables and figures of the paper, and are overwritten at every run.
+
+This repository contains everything needed to reproduce the results of the
+paper: all the code, the data of the empirical application, and the
+documentation of how to run them. What it does **not** contain is anything the
+code itself produces, since those files amount to tens of gigabytes: the
+intermediate and output directories marked above, and
+`cfc_app/data/energy/inds.rds`, the vector of dates, which step 1 of the
+empirical application regenerates from `daily.csv` together with the other
+pre-processed files.
+
+None of them is needed to start: every script that generates them is included
+here, and the two `README.md` files document which step produces which file,
+how long each step takes, and how to obtain the intermediate files should
+re-running the expensive steps not be practical.
+
+Each of the two `README.md` files maps every table and figure of the paper to the
+script that produces it and to the file it is written to:
+
+-   `cfc_sim/README.md` covers **Table 6** of the manuscript and **Tables G.2 to
+    G.10** of the Online Appendix (the simulation experiment).
+-   `cfc_app/README.md` covers **Figures 2 and 3** and **Tables 7 and 8** of the
+    manuscript, and **Figures H.1 to H.5** and **Tables H.1 to H.4** of the
+    Online Appendix (the empirical application).
+
+Figure 1 and Tables 1 to 5 of the manuscript are descriptive (examples of linearly
+constrained series, symbols, combination approaches, model formulations, simulation
+settings) and are not generated by any script.
+
+## Computing environment
+
+The experiments were run on the following machine, and this is the environment
+in which the results shipped with this package are reproduced exactly:
+
+-   **Operating system**: Windows 10 x64 (build 19045)
+-   **CPU**: Intel Core i7-10700 @ 2.90GHz (8 cores / 16 threads)
+-   **RAM**: 64 GB
+-   **R**: 4.4.0 (2024-04-24 ucrt), platform `x86_64-w64-mingw32/x64`
+-   **LAPACK**: 3.12.0, the one bundled with R 4.4
+
+**Use R 4.4.x.** The simulation experiment is bit-exact only under that version
+of R: from R 4.5 onwards the bundled LAPACK changes from 3.12.0 to 3.12.1, which
+alters the random draws of the data-generating process. See *A note on exact
+reproducibility* in `cfc_sim/README.md` for the evidence and for what this does
+and does not affect. The empirical application in `cfc_app` is not affected and
+reproduces on any recent version of R.
+
+### R packages
+
+| Package | Version | | Package | Version |
+|---------|---------|---|---------|---------|
+| `Matrix` | 1.7-0 | | `kableExtra` | 1.4.0 |
+| `MASS` | 7.3-60.2 | | `progress` | 1.2.3 |
+| `tidyverse` | 2.0.0 | | `progressr` | 0.14.0 |
+| `dplyr` | 1.1.4 | | `reshape2` | 1.4.5 |
+| `tidyr` | 1.3.1 | | `zoo` | 1.8-12 |
+| `tibble` | 3.2.1 | | `scales` | 1.4.0 |
+| `readr` | 2.1.5 | | `tsutils` | 0.9.4 |
+| `stringr` | 1.5.1 | | `osqp` | 0.6.3.2 |
+| `ggplot2` | 4.0.2 | | `quadprog` | 1.5-8 |
+| `forecast` | 9.0.1 | | `doFuture` | 1.0.1 |
+| `FoReco` | 1.3.1 | | `doRNG` | 1.8.6 |
+| `FoCo2` | 0.1.4 | | `future` | 1.33.2 |
+| `foreach` | 1.5.2 | | | |
+
+All of them are on CRAN:
+
+```r
+install.packages(c("tidyverse", "forecast", "FoReco", "FoCo2", "doFuture",
+                   "doRNG", "kableExtra", "Matrix", "MASS", "progress",
+                   "progressr", "reshape2", "zoo", "tsutils", "scales"))
+```
+
+To install a specific version rather than the current one:
+
+```r
+install.packages("remotes")
+remotes::install_version("Matrix", version = "1.7-0")
+```

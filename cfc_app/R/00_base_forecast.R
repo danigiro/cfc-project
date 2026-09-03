@@ -31,7 +31,6 @@ dir.create(file.path(".", "fc",name, "base", model), recursive = TRUE,
            showWarnings = FALSE)
 
 end_traing <- NROW(data)-fixed_length
-end_traing <- 3
 
 pb <- progress_bar$new(format = paste0(name, " ", model, 
                                        " - Rep. :rep [:bar] :percent in :elapsed (ETA: :eta)"),

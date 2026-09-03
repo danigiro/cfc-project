@@ -23,5 +23,3 @@ for cor in $cor_hat
     done
   done
 done
-
-read -rsp $'Press enter to continue...\n'

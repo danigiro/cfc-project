@@ -1,6 +1,8 @@
 suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(kableExtra))
-type = "cor"
+args <- commandArgs(TRUE)
+type <- if (length(args) == 0) "cor" else match.arg(args[1], c("cor", "diag"))
+dir.create("./tables", recursive = TRUE, showWarnings = FALSE)
 
 data_avg_rel_bal <- readRDS(paste0("./score/", "balanced_hier_", type, ".rds")) |>
   pivot_longer(-c("setting", "p", "nr", "nh", "var", "sim", "name"), names_to = "err") |>
@@ -35,7 +37,7 @@ dfuni <- rbind(data_avg_rel_bal |>
 comb <- c("base$^{\\ast}$"="baseA-none", 
           "base$^{\\ast}_{\\text{shr}}$"="baseA-shr", 
           "base$_{\\text{shr}}$"="base-shr", 
-          "ew"="scr_sa-none", 
+          #"ew"="scr_sa-none", 
           "ow$_{\\text{var}}$"="scr_var-none", 
           "ow$_{\\text{cov}}$"="scr_cov-none",
           "src"="src_sa-shr", 
@@ -144,7 +146,7 @@ for(pattern_id in c("AvgRelMSE", "AvgRelMAE")){
 comb <- c("base$^{\\ast}$"="baseA-none", 
           "base$^{\\ast}_{\\text{shr}}$"="baseA-shr", 
           "base$_{\\text{shr}}$"="base-shr", 
-          "ew"="scr_sa-none", 
+          #"ew"="scr_sa-none", 
           "ow$_{\\text{var}}$"="scr_var-none", 
           "ow$_{\\text{cov}}$"="scr_cov-none",
           "src"="src_sa-shr", 
